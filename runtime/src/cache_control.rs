@@ -51,9 +51,17 @@ mod aarch64 {
         )
     }
 
+    /// return the cache line sizes as reported by the processor as a tuple of (dcache, icache)
     #[cfg(target_os = "macos")]
     fn get_cacheline_sizes() -> (usize, usize) {
+        // Mac OS does not allow user-space to read `ctr_el0``. Instead we are supposed to read
+        // `systcl`, but this only give us one cacheline size (presumably dcache).
+        // But we can find the answer (64 bytes) in Darwin source code:
+        // See https://github.com/apple/darwin-libplatform/blob/215b09856ab5765b7462a91be7076183076600df/src/cachecontrol/arm64/cache.s#L29C1-L30C1
         (128, 64)
+
+        // TODO: Do things the propper way:
+        // https://developer.apple.com/documentation/apple-silicon/porting-just-in-time-compilers-to-apple-silicon
     }
 
     /// waits for any previous cache operations to complete. According to the Aarch64 manuals
