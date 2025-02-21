@@ -32,6 +32,7 @@ mod aarch64 {
     use std::arch::asm;
 
     /// return the cache line sizes as reported by the processor as a tuple of (dcache, icache)
+    #[cfg(not(target_os = "macos"))]
     fn get_cacheline_sizes() -> (usize, usize) {
         let ctr_el0: usize;
 
@@ -48,6 +49,11 @@ mod aarch64 {
             4 << ((ctr_el0 >> 16) & 0xF),
             4 << (ctr_el0 & 0xF)
         )
+    }
+
+    #[cfg(target_os = "macos")]
+    fn get_cacheline_sizes() -> (usize, usize) {
+        (128, 64)
     }
 
     /// waits for any previous cache operations to complete. According to the Aarch64 manuals
